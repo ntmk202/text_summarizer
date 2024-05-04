@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,14 +21,14 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
 
     <!-- Libraries Stylesheet -->
-    <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet" />
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet" />
+    <link href="{% static 'lib/lightbox/css/lightbox.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'lib/owlcarousel/assets/owl.carousel.min.css' %}" rel="stylesheet" />
 
     <!-- Customized Bootstrap Stylesheet -->
-    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" />
 
     <!-- Template Stylesheet -->
-    <link href="css/style.css" rel="stylesheet" />
+    <link href="{% static 'css/style.css' %}" rel="stylesheet" />
 </head>
 
 <body>
@@ -42,7 +43,7 @@
     <div class="container-fluid fixed-top">
         <div class="container px-0">
             <nav class="navbar navbar-light bg-white navbar-expand-xl">
-                <a href="index.html" class="navbar-brand">
+                <a href="/" class="navbar-brand">
                     <h1 class="text-primary display-6">SumUp</h1>
                 </a>
                 <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse"
@@ -51,10 +52,10 @@
                 </button>
                 <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                     <div class="navbar-nav mx-auto">
-                        <a href="index.html" class="nav-item nav-link active">Home</a>
-                        <a href="index.html" class="nav-item nav-link">Text</a>
-                        <a href="shop.html" class="nav-item nav-link">Document</a>
-                        <a href="shop.html" class="nav-item nav-link">Video</a>
+                        <a href="/" class="nav-item nav-link">Home</a>
+                        <a href="urlPage" class="nav-item nav-link active">Url Page</a>
+                        <a href="document" class="nav-item nav-link">Document</a>
+                        <a href="audio" class="nav-item nav-link">Audio</a>
 
                     </div>
                 </div>
@@ -73,15 +74,19 @@
     <div class="container-fluid testimonial py-5">
         <div class="container py-5">
             <div class="testimonial-header text-center">
-                <h4 class="text-primary">Document Summarization</h4>
+                <h4 class="text-primary">Text Summarization</h4>
             </div>
             <div class="p-5 bg-light rounded">
                 <div class="row g-4">
-                    <label for="avatar">Choose a document:</label>
-                    <input type="file" id="avatar" name="avatar"
-                     accept="application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf" />
-                    <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-                        <p>Drag a file to this <i>drop zone</i>.</p>
+                    <div class="col-lg-6">
+                        <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10"
+                            placeholder="Enter your url page here ..."></textarea>
+                        <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white "
+                            type="submit">Summarize</button>
+                    </div>
+                    <div class="col-lg-6">
+                        <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10"
+                            placeholder="Summary will appear here ..."></textarea>
                     </div>
                 </div>
             </div>
@@ -157,13 +162,13 @@
     <!-- JavaScript Libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/lightbox/js/lightbox.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="{% static 'lib/easing/easing.min.js' %}"></script>
+    <script src="{% static 'lib/waypoints/waypoints.min.js' %}"></script>
+    <script src="{% static 'lib/lightbox/js/lightbox.min.js' %}"></script>
+    <script src="{% static 'lib/owlcarousel/owl.carousel.min.js' %}"></script>
 
     <!-- Template Javascript -->
-    <script src="js/main.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 
 </html>
