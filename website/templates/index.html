@@ -32,13 +32,6 @@
 </head>
 
 <body>
-    <!-- Spinner Start -->
-    <div id="spinner"
-        class="show w-100 vh-100 bg-white position-fixed translate-middle top-50 start-50 d-flex align-items-center justify-content-center">
-        <div class="spinner-grow text-primary" role="status"></div>
-    </div>
-    <!-- Spinner End -->
-
     <!-- Navbar start -->
     <div class="container-fluid fixed-top">
         <div class="container px-0">
@@ -87,14 +80,17 @@
             <div class="p-5 bg-light rounded">
                 <div class="row g-4">
                     <div class="col-lg-6">
-                        <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10"
-                            placeholder="Enter your text here ..."></textarea>
+                        <form method="post" action="{% url 'home' %}">
+                            {% csrf_token %}
+                        <textarea style="height: auto" class="w-100 form-control border-0 mb-4" rows="10" cols="10"
+                            placeholder="Enter your text here ..." name="input_text">{{input_text}}</textarea>
                         <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white "
                             type="submit">Summarize</button>
+                        </form>
                     </div>
                     <div class="col-lg-6">
-                        <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10"
-                            placeholder="Summary will appear here ..."></textarea>
+                        <textarea style="background-color: white" class="w-100 form-control border-0 mb-4" rows="10" cols="10"
+                            placeholder="Summary will appear here ..." readonly>{{ summarized_text }}</textarea>
                     </div>
                 </div>
             </div>
