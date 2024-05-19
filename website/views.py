@@ -3,7 +3,9 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from transformers import pipeline, AutoTokenizer
-
+from .models import Summary
+from datetime import date
+from itertools import groupby
 
 def home(request):
     fname = request.user.first_name if request.user.is_authenticated else None
@@ -15,6 +17,10 @@ def home(request):
         summarizer = pipeline("summarization", model=model_path, framework='tf')
         summary = summarizer(input_text, max_length=1000, min_length=30, do_sample=False)
         summarized_text = summary[0]['summary_text']
+
+        if request.user.is_authenticated:
+            Summary.objects.create(user=request.user, original_text=input_text, summarized_text=summarized_text)
+
         return render(request, 'index.html', {'summarized_text': summarized_text, 'input_text': input_text, 'fname': fname})
     else:
         return render(request, 'index.html', {'fname': fname})
@@ -22,6 +28,18 @@ def home(request):
 def urlPage(request):
     fname = request.user.first_name if request.user.is_authenticated else None
     return render(request, 'urlPage.html', {'fname': fname})
+
+def history(request):
+    fname = request.user.first_name if request.user.is_authenticated else None
+    if request.user.is_authenticated:
+        summaries = Summary.objects.filter(user=request.user).order_by('-created_at')
+        grouped_summaries = {}
+        for key, group in groupby(summaries, lambda x: x.created_at.date()):
+            grouped_summaries[key] = list(group)
+    else:
+        grouped_summaries = {}
+
+    return render(request, 'history.html', {'grouped_summaries': grouped_summaries, 'fname': fname})
 
 def document(request):
     fname = request.user.first_name if request.user.is_authenticated else None
@@ -43,7 +61,6 @@ def signin(request):
             login(request, user)
             fname = user.first_name
             return render(request, 'index.html', {'fname': fname})
-            # return redirect("home")
         else:
             messages.error(request, "Bad credentials!")
             return redirect("signin")
@@ -74,8 +91,8 @@ def signup(request):
 def signout(request):
     logout(request)
     messages.success(request, "Logged out successfully!")
-    return redirect("home")
-  
+    return redirect("home")  
+
 
 def test(request):
     if request.method == 'POST':

@@ -45,10 +45,11 @@
                 </button>
                 <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                     <div class="navbar-nav mx-auto">
-                        <a href="/" class="nav-item nav-link">Home</a>
-                        <a href="urlPage" class="nav-item nav-link active">Url Page</a>
+                        <a href="/" class="nav-item nav-link active">Home</a>
+                        <a href="urlPage" class="nav-item nav-link">Url Page</a>
                         <a href="document" class="nav-item nav-link">Document</a>
                         <a href="audio" class="nav-item nav-link">Audio</a>
+
                     </div>
                 </div>
                 {% if user.is_authenticated %}
@@ -59,7 +60,7 @@
                         <div class="dropdown-menu m-0 bg-secondary rounded-0">
                             <a href="/signout" class="dropdown-item">Log out</a>
                             <a href="/history" class="dropdown-item">View history</a>
-                        </div> 
+                        </div>
                     </div>
                 </div>
                 {% else %}
@@ -75,21 +76,56 @@
     <div class="container-fluid testimonial py-5">
         <div class="container py-5">
             <div class="testimonial-header text-center">
-                <h4 class="text-primary">Text Summarization</h4>
+                <h4 class="text-primary">Summary History</h4>
             </div>
+
             <div class="p-5 bg-light rounded">
+
+                {% block content %}
+                {% if grouped_summaries %}
+                {% for date, summaries in grouped_summaries.items %}
+                <strong>{{ date }}</strong><br></br>
+                {% for summary in summaries %}
+
                 <div class="row g-4">
-                    <div class="col-lg-6">
-                        <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10"
-                            placeholder="Enter your url page here ..."></textarea>
-                        <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white "
-                            type="submit">Summarize</button>
+                    <div class="col-md-1">
+                        <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i
+                                class="fas fa-star"></i></a>
                     </div>
-                    <div class="col-lg-6">
-                        <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10"
-                            placeholder="Summary will appear here ..."></textarea>
+                    <div class="col-lg-5">
+                        <form method="post" action="{% url 'home' %}">
+                            {% csrf_token %}
+                            <textarea style="height: auto" class="w-100 form-control border-0 mb-4" rows="2" cols="10"
+                                placeholder="Enter your text here ..."
+                                name="input_text">{{ summary.original_text }}</textarea>
+                    </div>
+                    <div class="col-lg-5">
+                        <textarea style="background-color: white" class="w-100 form-control border-0 mb-4" rows="2"
+                            cols="10"
+                            placeholder="Summary will appear here ...">{{ summary.summarized_text }}</textarea>
+                    </div>
+                    <div class="col-md-1">
+
+
+                        <div class="nav-item dropdown">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </a>
+                            <div class="dropdown-menu m-0 rounded-0">
+                                <a href="#" class="dropdown-item">View Detail</a>
+                                <a href="#" class="dropdown-item">Delete</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
+                <hr>
+                </hr>
+                {% endfor %}
+                {% else %}
+                <p>No summaries found.</p>
+                {% endif %}
+                {% endblock %}
             </div>
         </div>
     </div>
