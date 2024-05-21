@@ -6,6 +6,8 @@ from transformers import pipeline, AutoTokenizer
 from .models import Summary
 from datetime import date
 from itertools import groupby
+from django.shortcuts import get_object_or_404
+
 
 def home(request):
     fname = request.user.first_name if request.user.is_authenticated else None
@@ -92,6 +94,11 @@ def signout(request):
     logout(request)
     messages.success(request, "Logged out successfully!")
     return redirect("home")  
+
+def summary_detail(request, id):
+    fname = request.user.first_name if request.user.is_authenticated else None
+    summary = get_object_or_404(Summary, id=id, user=request.user)
+    return render(request, 'summary_detail.html', {'summary': summary, 'fname': fname})
 
 
 def test(request):
