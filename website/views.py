@@ -100,6 +100,12 @@ def summary_detail(request, id):
     summary = get_object_or_404(Summary, id=id, user=request.user)
     return render(request, 'summary_detail.html', {'summary': summary, 'fname': fname})
 
+def delete_summary(request, id):
+    if request.user.is_authenticated:
+        summary = get_object_or_404(Summary, id=id, user=request.user)
+        summary.delete()
+        messages.success(request, "Summary deleted successfully.")
+        return redirect('history')
 
 def test(request):
     if request.method == 'POST':

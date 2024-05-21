@@ -10,6 +10,6 @@ urlpatterns = [
     path('signup', views.signup, name='signup'),
     path('history', views.history, name='history'),
     path('history/<int:id>/', views.summary_detail, name='summary_detail'),
-    # path('history/<int:id>/delete/', views.delete_summary, name='delete_summary'),
+    path('history/delete/<int:id>/', views.delete_summary, name='delete_summary'),
     path('signout', views.signout, name='signout'),
 ]
