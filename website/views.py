@@ -7,17 +7,18 @@ from .models import Summary
 from datetime import date
 from itertools import groupby
 from django.shortcuts import get_object_or_404
-
+from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled, NoTranscriptAvailable
+import re
 
 def home(request):
     fname = request.user.first_name if request.user.is_authenticated else None
     if request.method == 'POST':
         input_text = request.POST.get('input_text')
         tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
-        model_path = "Falconsai/text_summarization"
-        # tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-        summarizer = pipeline("summarization", model=model_path, framework='tf')
-        summary = summarizer(input_text, max_length=1000, min_length=30, do_sample=False)
+        model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+        summarizer = pipeline("summarization", model=model_path,tokenizer=tokenizer, framework='tf')
+        summary = summarizer(input_text, length_penalty= 0.8, num_beams=8, max_length= 1028)
         summarized_text = summary[0]['summary_text']
 
         if request.user.is_authenticated:
@@ -47,9 +48,65 @@ def document(request):
     fname = request.user.first_name if request.user.is_authenticated else None
     return render(request, 'document.html', {'fname': fname})
 
-def audio(request):
+COMMON_LANGUAGES = [
+    ('English', 'en'),
+    ('English (United Kingdom)', 'en-GB'),
+    ('Spanish', 'es'),
+    ('French', 'fr'),
+    ('German', 'de'),
+    ('Vietnamese', 'vi'),
+]
+
+def youtube_link(request):
     fname = request.user.first_name if request.user.is_authenticated else None
-    return render(request, 'audio.html', {'fname': fname})
+    available_languages = COMMON_LANGUAGES
+    transcript = None
+    error = None
+    summarized_text = None
+
+    if request.method == 'POST':
+        youtube_link = request.POST.get('youtube_link')
+        language_code = request.POST.get('language_code', 'en')
+        video_id = extract_video_id(youtube_link)
+
+        if video_id:
+            try:
+                transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[language_code])
+                transcript_text = " ".join([t['text'] for t in transcript])
+                tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
+                model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
+                tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+                summarizer = pipeline("summarization", model=model_path,tokenizer=tokenizer, framework='tf')
+                summary = summarizer(transcript_text, length_penalty= 0.8, num_beams=8, max_length= 1028)
+                summarized_text = summary[0]['summary_text']
+            except NoTranscriptFound as e:
+                try:
+                    transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+                    available_languages = [(t.language, t.language_code) for t in transcripts]
+                    error = 'Please choose an available language code'
+                except (TranscriptsDisabled, NoTranscriptAvailable) as e:
+                    error = 'Transcripts are disabled for this video or not available.'
+            except Exception as e:
+                error = str(e)
+        else:
+            error = 'Invalid YouTube URL'
+
+    return render(request, 'audio.html', {
+        'transcript': transcript,
+        'summarized_text': summarized_text,
+        'fname': fname,
+        'error': error,
+        'available_languages': available_languages,
+    })
+
+def extract_video_id(url):
+    """
+    Extract the video ID from a YouTube URL.
+    """
+    pattern = r'(?:v=|\/)([0-9A-Za-z_-]{11}).*'
+    match = re.search(pattern, url)
+    return match.group(1) if match else None
+
 
 def signin(request):
 
@@ -107,15 +164,3 @@ def delete_summary(request, id):
         messages.success(request, "Summary deleted successfully.")
         return redirect('history')
 
-def test(request):
-    if request.method == 'POST':
-        input_text = request.POST.get('input_text')
-        tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
-        model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
-        tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
-        summarizer = pipeline("summarization", model=model_path,tokenizer=tokenizer, framework='tf')
-        summary = summarizer(input_text, length_penalty= 0.8, num_beams=8, max_length= 1028)
-        summarized_text = summary[0]['summary_text']
-        return render(request, 'test.html', {'summarized_text': summarized_text})
-    else:
-        return render(request, 'test.html', {})

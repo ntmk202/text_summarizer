@@ -48,7 +48,7 @@
                         <a href="/" class="nav-item nav-link">Home</a>
                         <a href="urlPage" class="nav-item nav-link">Url Page</a>
                         <a href="document" class="nav-item nav-link">Document</a>
-                        <a href="audio" class="nav-item nav-link active">Audio</a>
+                        <a href="youtube_link" class="nav-item nav-link active">Youtube link</a>
 
                     </div>
                 </div>
@@ -76,16 +76,43 @@
     <div class="container-fluid testimonial py-5">
         <div class="container py-5">
             <div class="testimonial-header text-center">
-                <h4 class="text-primary">Document Summarization</h4>
+                <h4 class="text-primary">YouTube link Summarization</h4>
             </div>
             <div class="p-5 bg-light rounded">
                 <div class="row g-4">
-                    <label for="avatar">Choose a document:</label>
-                    <input type="file" id="avatar" name="avatar"
-                     accept="application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf" />
-                    <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-                        <p>Drag a file to this <i>drop zone</i>.</p>
+                    <h1>Enter YouTube URL</h1>
+                    <form method="post" action="{% url 'youtube_link' %}">
+                        {% csrf_token %}
+                        <input class="form-control border-0 mb-4"
+                         type="text" name="youtube_link" placeholder="Enter YouTube video URL" required>
+                        <select name="language_code">
+                            {% for language, code in available_languages %}
+                                <option value="{{ code }}">{{ language }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white mt-4" 
+                        type="submit">Get Transcript and Summarize</button>
+                    </form>
+                </div>
+                <div class="row g-4 mt-4">
+                    {% if transcript %}
+                    <div class="col-lg-6">
+                        <h2>Transcript</h2>
+                        <p class="p-2">
+                            {% for item in transcript %}
+                                {{ item.text }}
+                            {% endfor %}
+                        </p>
                     </div>
+                    <div class="col-lg-6">
+                        <h2>Summary</h2>
+                        {% if summarized_text %}
+                            <p class="p-2">{{ summarized_text }}</p>
+                        {% endif %}
+                    </div>
+                    {% elif error %}
+                        <p>Error: {{ error }}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
