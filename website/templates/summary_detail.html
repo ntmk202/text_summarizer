@@ -79,13 +79,19 @@
       </div> -->
 
       <div class="p-5 bg-light rounded">
-        <h1>Summary Detail</h1>
-        <hr></hr>
-        <p><strong>Created At:</strong> {{ summary.created_at }}</p>
-        <p><strong>Original Text:</strong></p>
-        <p>{{ summary.original_text }}</p>
-        <p><strong>Summarized Text:</strong></p>
-        <p>{{ summary.summarized_text }}</p>
+        <div class="row g-4">
+          <h1>Summary Detail</h1>
+          <hr></hr>
+          <p><strong>Created At:</strong> {{ summary.created_at }}</p>
+            <div class="col-lg-6 pe-3">
+            <h3>Original Text</h3>
+            <p>{{ summary.original_text }}</p>
+          </div>
+          <div class="col-lg-6">
+            <h3>Summarized Text</h3>
+            <p>{{ summary.summarized_text }}</p>
+          </div>
+        </div>
         <a href="{% url 'history' %}">Back to History</a>
 
       </div>

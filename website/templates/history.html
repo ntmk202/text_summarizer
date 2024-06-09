@@ -95,12 +95,12 @@
                     <div class="col-lg-5">
                         <form method="post" action="{% url 'home' %}">
                             {% csrf_token %}
-                            <textarea style="height: auto" class="w-100 form-control border-0 mb-4" rows="2" cols="10"
+                            <textarea style="height: auto" class="w-100 form-control border-0 mb-4" rows="4" cols="10"
                                 placeholder="Enter your text here ..."
                                 name="input_text">{{ summary.original_text }}</textarea>
                     </div>
                     <div class="col-lg-5">
-                        <textarea style="background-color: white" class="w-100 form-control border-0 mb-4" rows="2"
+                        <textarea style="background-color: white" class="w-100 form-control border-0 mb-4" rows="4"
                             cols="10"
                             placeholder="Summary will appear here ...">{{ summary.summarized_text }}</textarea>
                     </div>
@@ -108,7 +108,7 @@
 
 
                         <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <a href="#" class="nav-link" data-bs-toggle="dropdown">
                                 <i class="fas fa-ellipsis-v"></i>
                             </a>
                             <div class="dropdown-menu m-0 rounded-0">

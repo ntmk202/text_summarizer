@@ -51,9 +51,6 @@ def document(request):
 COMMON_LANGUAGES = [
     ('English', 'en'),
     ('English (United Kingdom)', 'en-GB'),
-    ('Spanish', 'es'),
-    ('French', 'fr'),
-    ('German', 'de'),
     ('Vietnamese', 'vi'),
 ]
 

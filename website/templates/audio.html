@@ -98,7 +98,7 @@
                     {% if transcript %}
                     <div class="col-lg-6">
                         <h2>Transcript</h2>
-                        <p class="p-2">
+                        <p class="p-2 bg-white">
                             {% for item in transcript %}
                                 {{ item.text }}
                             {% endfor %}
@@ -107,7 +107,7 @@
                     <div class="col-lg-6">
                         <h2>Summary</h2>
                         {% if summarized_text %}
-                            <p class="p-2">{{ summarized_text }}</p>
+                            <p class="p-2 bg-white">{{ summarized_text }}</p>
                         {% endif %}
                     </div>
                     {% elif error %}

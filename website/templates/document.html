@@ -80,12 +80,14 @@
             </div>
             <div class="p-5 bg-light rounded">
                 <div class="row g-4">
-                    <label for="avatar">Choose a document:</label>
+                    <label for="avatar">Choose a document</label>
                     <input type="file" id="avatar" name="avatar"
                      accept="application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf" />
                     <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
                         <p>Drag a file to this <i>drop zone</i>.</p>
                     </div>
+                    <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white mt-4" 
+                        type="submit">Summarize</button>
                 </div>
             </div>
         </div>
