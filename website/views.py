@@ -16,8 +16,8 @@ def home(request):
     fname = request.user.first_name if request.user.is_authenticated else None
     if request.method == 'POST':
         input_text = request.POST.get('input_text')
-        tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
-        model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
+        tokenizer_path = "D:/Learning/DoAn/DoAnChuyenNganh3/text_summarizer/website/model/tokenizer-summarization"
+        model_path = "D:/Learning/DoAn/DoAnChuyenNganh3/text_summarizer/website/model/pegasus-samsum-model"
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
         summarizer = pipeline("summarization", model=model_path,tokenizer=tokenizer, framework='tf')
         summary = summarizer(input_text, length_penalty= 0.8, num_beams=8, max_length= 1024)
@@ -31,8 +31,8 @@ def home(request):
         return render(request, 'index.html', {'fname': fname})
 
 def summarize_long_text(text, max_chunk_size=1024):
-    tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
-    model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
+    tokenizer_path = "D:/Learning/DoAn/DoAnChuyenNganh3/text_summarizer/website/model/tokenizer-summarization"
+    model_path = "D:/Learning/DoAn/DoAnChuyenNganh3/text_summarizer/website/model/pegasus-samsum-model"
 
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     summarizer = pipeline("summarization", model=model_path, tokenizer=tokenizer, framework='tf')
@@ -76,6 +76,10 @@ def urlPage(request):
         try:
             text = fetch_text_from_url(url)
             summary = summarize_long_text(text)
+
+            if request.user.is_authenticated:
+                Summary.objects.create(user=request.user, original_text=text, summarized_text=summary)
+
         except Exception as e:
             error = str(e)
 
@@ -108,6 +112,10 @@ def document(request):
                         destination.write(chunk)
                 text = extract_text_from_pdf('uploaded_file.pdf')
                 summary = summarize_long_text(text)
+
+                if request.user.is_authenticated:
+                    Summary.objects.create(user=request.user, original_text=text, summarized_text=summary)
+
             except Exception as e:
                 error = str(e)
         else:
@@ -141,12 +149,15 @@ def youtube_link(request):
             try:
                 transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=[language_code])
                 transcript_text = " ".join([t['text'] for t in transcript])
-                tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
-                model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
+                tokenizer_path = "D:/Learning/DoAn/DoAnChuyenNganh3/text_summarizer/website/model/tokenizer-summarization"
+                model_path = "D:/Learning/DoAn/DoAnChuyenNganh3/text_summarizer/website/model/pegasus-samsum-model"
                 tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
                 summarizer = pipeline("summarization", model=model_path,tokenizer=tokenizer, framework='tf')
                 summary = summarizer(transcript_text, length_penalty= 0.8, num_beams=8, max_length= 1028)
                 summarized_text = summary[0]['summary_text']
+
+                if request.user.is_authenticated:
+                    Summary.objects.create(user=request.user, original_text=transcript_text, summarized_text=summarized_text)
             except NoTranscriptFound as e:
                 try:
                     transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
