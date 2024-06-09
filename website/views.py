@@ -2,13 +2,15 @@ from django.shortcuts import redirect, render
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from transformers import pipeline, AutoTokenizer
-from .models import Summary
-from datetime import date
-from itertools import groupby
 from django.shortcuts import get_object_or_404
-from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled, NoTranscriptAvailable
+from .models import Summary
 import re
+import fitz
+import requests
+from itertools import groupby
+from bs4 import BeautifulSoup
+from transformers import pipeline, AutoTokenizer
+from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled, NoTranscriptAvailable
 
 def home(request):
     fname = request.user.first_name if request.user.is_authenticated else None
@@ -18,7 +20,7 @@ def home(request):
         model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
         summarizer = pipeline("summarization", model=model_path,tokenizer=tokenizer, framework='tf')
-        summary = summarizer(input_text, length_penalty= 0.8, num_beams=8, max_length= 1028)
+        summary = summarizer(input_text, length_penalty= 0.8, num_beams=8, max_length= 1024)
         summarized_text = summary[0]['summary_text']
 
         if request.user.is_authenticated:
@@ -28,25 +30,94 @@ def home(request):
     else:
         return render(request, 'index.html', {'fname': fname})
 
+def summarize_long_text(text, max_chunk_size=1024):
+    tokenizer_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/tokenizer-summarization"
+    model_path = "D:/python/NLP/django_text-summarize/text_summarizer/website/model/pegasus-samsum-model"
+
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+    summarizer = pipeline("summarization", model=model_path, tokenizer=tokenizer, framework='tf')
+
+    sentences = text.split('. ')
+    current_chunk = []
+    chunks = []
+
+    for sentence in sentences:
+        if len(' '.join(current_chunk + [sentence])) <= max_chunk_size:
+            current_chunk.append(sentence)
+        else:
+            chunks.append(' '.join(current_chunk))
+            current_chunk = [sentence]
+
+    if current_chunk:
+        chunks.append(' '.join(current_chunk))
+
+    summaries = [
+        summarizer(chunk, length_penalty=0.8, num_beams=8, max_length=300, min_length=30, do_sample=False)[0]['summary_text']
+        for chunk in chunks
+    ]
+    return ' '.join(summaries)
+
+def fetch_text_from_url(url):
+    response = requests.get(url)
+    response.raise_for_status()
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    text = ' '.join(p.get_text() for p in soup.find_all('p'))
+    return text
+
 def urlPage(request):
     fname = request.user.first_name if request.user.is_authenticated else None
-    return render(request, 'urlPage.html', {'fname': fname})
+    summary = None
+    error = None
+    text = ''
 
-def history(request):
-    fname = request.user.first_name if request.user.is_authenticated else None
-    if request.user.is_authenticated:
-        summaries = Summary.objects.filter(user=request.user).order_by('-created_at')
-        grouped_summaries = {}
-        for key, group in groupby(summaries, lambda x: x.created_at.date()):
-            grouped_summaries[key] = list(group)
-    else:
-        grouped_summaries = {}
+    if request.method == 'POST':
+        url = request.POST.get('url')
+        try:
+            text = fetch_text_from_url(url)
+            summary = summarize_long_text(text)
+        except Exception as e:
+            error = str(e)
 
-    return render(request, 'history.html', {'grouped_summaries': grouped_summaries, 'fname': fname})
+    return render(request, 'urlPage.html', {
+        'summary': summary,
+        'error': error,
+        'text': text,
+        'fname': fname,
+    })
+
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    document = fitz.open(pdf_path)
+    for page_num in range(len(document)):
+        page = document.load_page(page_num)
+        text += page.get_text()
+    return text
 
 def document(request):
     fname = request.user.first_name if request.user.is_authenticated else None
-    return render(request, 'document.html', {'fname': fname})
+    summary = None
+    error = None
+
+    if request.method == 'POST':
+        pdf_file = request.FILES.get('pdf_file')
+        if pdf_file:
+            try:
+                with open('uploaded_file.pdf', 'wb+') as destination:
+                    for chunk in pdf_file.chunks():
+                        destination.write(chunk)
+                text = extract_text_from_pdf('uploaded_file.pdf')
+                summary = summarize_long_text(text)
+            except Exception as e:
+                error = str(e)
+        else:
+            error = 'Please upload a PDF file.'
+
+    return render(request, 'document.html', {
+        'summary': summary,
+        'error': error,
+        'fname': fname,
+    })
 
 COMMON_LANGUAGES = [
     ('English', 'en'),
@@ -104,6 +175,17 @@ def extract_video_id(url):
     match = re.search(pattern, url)
     return match.group(1) if match else None
 
+def history(request):
+    fname = request.user.first_name if request.user.is_authenticated else None
+    if request.user.is_authenticated:
+        summaries = Summary.objects.filter(user=request.user).order_by('-created_at')
+        grouped_summaries = {}
+        for key, group in groupby(summaries, lambda x: x.created_at.date()):
+            grouped_summaries[key] = list(group)
+    else:
+        grouped_summaries = {}
+
+    return render(request, 'history.html', {'grouped_summaries': grouped_summaries, 'fname': fname})
 
 def signin(request):
 

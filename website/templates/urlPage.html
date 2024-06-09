@@ -81,14 +81,29 @@
             <div class="p-5 bg-light rounded">
                 <div class="row g-4">
                     <div class="col-lg-6">
-                        <input class="w-100 form-control border-0 mb-4"
-                            type="text" placeholder="Enter your page URL" required>
-                        <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white "
-                            type="submit">Summarize</button>
+                        <form method="post" action="{% url 'url_Page' %}>
+                            {% csrf_token %}
+                            {% if not text %}
+                                <input class="w-100 form-control border-0 mb-4"
+                                    type="text" name="url" placeholder="Enter your page URL" required/>
+                                {% else %}
+                                <textarea class="w-100 form-control border-0 mb-4" rows="10" cols="10" name="text
+                                ">{{ text }}</textarea>
+                            {% endif %}
+                            <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white "
+                                type="submit">Summarize</button>
+                        </form>
                     </div>
                     <div class="col-lg-6">
                         <textarea class="w-100 form-control border-0 mb-4 bg-white" rows="10" cols="10"
-                            placeholder="Summary will appear here ..." readonly></textarea>
+                            placeholder="Summary will appear here ..." readonly>
+                            {% if summary %}
+                                {{ summary }}
+                            {% endif %}
+                            {% if error %}
+                                {{ error }}
+                            {% endif %}
+                        </textarea>
                     </div>
                 </div>
             </div>

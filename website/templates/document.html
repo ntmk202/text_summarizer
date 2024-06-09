@@ -80,14 +80,26 @@
             </div>
             <div class="p-5 bg-light rounded">
                 <div class="row g-4">
-                    <label for="avatar">Choose a document</label>
-                    <input type="file" id="avatar" name="avatar"
-                     accept="application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/pdf" />
-                    <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
-                        <p>Drag a file to this <i>drop zone</i>.</p>
-                    </div>
-                    <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white mt-4" 
-                        type="submit">Summarize</button>
+                    <form method="post" enctype="multipart/form-data" action="{% url 'document' %}">
+                        {% csrf_token %}
+                        <label for="avatar">Choose a document (PDF) </label> <br>
+                        <input id="avatar" type="file" name="pdf_file" accept="application/pdf" required/>
+                        <div id="drop_zone" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+                            <p>Drag a file to this <i>drop zone</i>.</p>
+                        </div>
+                        <button class="w-100 btn form-control border-secondary py-3 bg-primary text-white mt-4" 
+                            type="submit">Summarize</button>
+                    </form>
+                </div>
+                <div class="row g-4 mt-4">
+                    {% if summary %}
+                        <h2>Summary</h2>
+                        <p>{{ summary }}</p>
+                    {% endif %}
+                    {% if error %}
+                        <h2>Error</h2>
+                        <p>{{ error }}</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
